@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package export;
+
+option go_package = "github.com/fluxo/export-middleware/proto/export";
+
+// ExportService handles streaming data export operations
+service ExportService {
+  // StreamExport creates a task and streams data records for export
+  rpc StreamExport(stream ExportRequest) returns (ExportResponse);
+  
+  // QueryTaskStatus retrieves the current status of an export task
+  rpc QueryTaskStatus(TaskStatusRequest) returns (TaskStatusResponse);
+}
+
+// ExportFormat specifies the output file format
+enum ExportFormat {
+  FORMAT_UNSPECIFIED = 0;
+  FORMAT_EXCEL = 1;
+  FORMAT_CSV = 2;
+}
+
+// DataType specifies the type of data in a column
+enum DataType {
+  DATA_TYPE_UNSPECIFIED = 0;
+  DATA_TYPE_STRING = 1;
+  DATA_TYPE_NUMBER = 2;
+  DATA_TYPE_DATE = 3;
+  DATA_TYPE_BOOLEAN = 4;
+}
+
+// TaskStatus represents the current state of an export task
+enum TaskStatus {
+  TASK_STATUS_UNSPECIFIED = 0;
+  TASK_STATUS_QUEUED = 1;
+  TASK_STATUS_PROCESSING = 2;
+  TASK_STATUS_UPLOADING = 3;
+  TASK_STATUS_COMPLETED = 4;
+  TASK_STATUS_FAILED = 5;
+}
+
+// ColumnDefinition defines metadata for a column
+message ColumnDefinition {
+  string name = 1;              // Column header text
+  DataType data_type = 2;       // Data type of the column
+  int32 width = 3;              // Column width hint (optional)
+  string format = 4;            // Display format (e.g., date pattern)
+}
+
+// FormatOptions contains format-specific configuration
+message FormatOptions {
+  // CSV-specific options
+  string csv_delimiter = 1;     // Field separator for CSV
+  string csv_encoding = 2;      // Character encoding for CSV
+  
+  // Excel-specific options
+  string excel_sheet_name = 3;  // Worksheet name
+  int32 excel_start_row = 4;    // Starting row for data
+  
+  // Common options
+  bool compression_enabled = 5;  // Enable file compression
+}
+
+// ExportMetadata contains metadata for the export request
+message ExportMetadata {
+  string request_id = 1;                    // Unique identifier for tracking
+  ExportFormat format = 2;                  // Output format
+  string filename = 3;                      // Desired output filename
+  repeated ColumnDefinition columns = 4;    // Column headers and metadata
+  FormatOptions options = 5;                // Format-specific options
+}
+
+// Record represents a single data record
+message Record {
+  repeated string values = 1;   // Ordered field values matching columns
+}
+
+// DataBatch contains a batch of records
+message DataBatch {
+  repeated Record records = 1;  // Array of data records
+  int64 batch_sequence = 2;     // Sequence number for ordering
+}
+
+// ExportRequest is used for streaming export data
+message ExportRequest {
+  oneof payload {
+    ExportMetadata metadata = 1;  // First message: metadata
+    DataBatch batch = 2;          // Subsequent messages: data batches
+  }
+}
+
+// ExportResponse contains the result of an export operation
+message ExportResponse {
+  string task_id = 1;                           // Unique task identifier
+  TaskStatus status = 2;                        // Current task status
+  string oss_url = 3;                           // OSS download URL (if completed)
+  int64 file_size_bytes = 4;                    // Generated file size
+  int64 record_count = 5;                       // Total records written
+  float progress_percent = 6;                   // Processing progress (0-100)
+  string checksum_sha256 = 7;                   // File integrity hash
+  string error_message = 8;                     // Error details if failed
+  string error_code = 9;                        // Error classification code
+  int64 start_time = 10;                        // Task initiation time (Unix timestamp)
+  int64 completion_time = 11;                   // Task completion time (Unix timestamp)
+}
+
+// TaskStatusRequest is used to query task status
+message TaskStatusRequest {
+  string task_id = 1;  // Task identifier to query
+}
+
+// TaskStatusResponse contains detailed task status information
+message TaskStatusResponse {
+  string task_id = 1;                           // Task identifier
+  TaskStatus status = 2;                        // Current task state
+  ExportFormat format = 3;                      // Export format
+  string filename = 4;                          // Target filename
+  int64 records_processed = 5;                  // Number of records processed
+  float progress_percent = 6;                   // Completion percentage
+  string oss_url = 7;                           // Download URL (if completed)
+  int64 file_size_bytes = 8;                    // File size (if completed)
+  string error_message = 9;                     // Error message (if failed)
+  string error_code = 10;                       // Error code
+  int64 start_time = 11;                        // When task started (Unix timestamp)
+  int64 completion_time = 12;                   // When task finished (Unix timestamp)
+  int64 estimated_time_remaining = 13;          // Seconds until completion
+}

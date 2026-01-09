@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  export-middleware:
+    build: .
+    ports:
+      - "9090:9090"  # gRPC server
+      - "9091:9091"  # Status API
+      - "8080:8080"  # Metrics
+    environment:
+      - OSS_ENDPOINT=${OSS_ENDPOINT}
+      - OSS_BUCKET=${OSS_BUCKET}
+      - OSS_ACCESS_KEY_ID=${OSS_ACCESS_KEY_ID}
+      - OSS_ACCESS_KEY_SECRET=${OSS_ACCESS_KEY_SECRET}
+      - LOG_LEVEL=info
+    volumes:
+      - ./config.yaml:/root/config.yaml:ro
+      - ./temp:/tmp/export-middleware
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

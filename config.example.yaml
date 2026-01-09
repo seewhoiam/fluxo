@@ -1,0 +1,48 @@
+# Export Middleware Configuration Example
+
+server:
+  port: 9090              # gRPC server port
+  status_port: 9091       # Status query API port  
+  max_connections: 100    # Maximum concurrent connections
+  timeout: 30s            # Request timeout
+
+concurrency:
+  max_concurrent_tasks: 10  # Maximum number of concurrent export tasks
+  task_queue_size: 100      # Task queue capacity
+  queue_timeout: 5m         # Maximum time a task can wait in queue
+
+performance:
+  buffer_size: 10485760     # Write buffer size (10MB)
+  max_batch_size: 1000      # Maximum records per batch
+  write_timeout: 30s        # File write timeout
+
+storage:
+  temp_directory: /tmp/export-middleware  # Temporary file storage directory
+  temp_retention: 1h                       # How long to keep temp files after upload
+  cleanup_enabled: true                    # Enable automatic cleanup
+
+oss:
+  endpoint: oss-cn-hangzhou.aliyuncs.com  # Alibaba Cloud OSS endpoint
+  bucket: my-export-bucket                 # OSS bucket name
+  access_key_id: YOUR_ACCESS_KEY_ID        # OSS access key ID (can use env: OSS_ACCESS_KEY_ID)
+  access_key_secret: YOUR_ACCESS_KEY_SECRET # OSS access key secret (can use env: OSS_ACCESS_KEY_SECRET)
+  part_size: 10485760                      # Multi-part upload part size (10MB)
+  signed_url_expiry: 168h                  # Signed URL expiration (7 days)
+  max_retries: 3                           # Maximum upload retry attempts
+  parallel_parts: 5                        # Concurrent parts for multi-part upload
+  upload_timeout: 30m                      # Maximum upload duration
+
+security:
+  auth_enabled: false     # Enable authentication
+  tls_enabled: false      # Enable TLS
+  allowed_clients: []     # List of allowed client IDs
+
+logging:
+  level: info            # Log level: debug, info, warn, error, fatal
+  format: json           # Log format: json or text
+  output: stdout         # Log output: stdout, stderr, or file path
+  enable_tracing: false  # Enable distributed tracing
+
+monitoring:
+  metrics_port: 8080              # Prometheus metrics port
+  health_check_interval: 30s      # Health check interval
