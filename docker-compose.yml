@@ -14,7 +14,7 @@ services:
       - OSS_ACCESS_KEY_SECRET=${OSS_ACCESS_KEY_SECRET}
       - LOG_LEVEL=info
     volumes:
-      - ./config.yaml:/root/config.yaml:ro
+      - ./config/config.yaml:/root/config.yaml:ro
       - ./temp:/tmp/export-middleware
     restart: unless-stopped
     healthcheck:
