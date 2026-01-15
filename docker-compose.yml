@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   export-middleware:
     build: .
@@ -8,13 +6,9 @@ services:
       - "9091:9091"  # Status API
       - "8080:8080"  # Metrics
     environment:
-      - OSS_ENDPOINT=${OSS_ENDPOINT}
-      - OSS_BUCKET=${OSS_BUCKET}
-      - OSS_ACCESS_KEY_ID=${OSS_ACCESS_KEY_ID}
-      - OSS_ACCESS_KEY_SECRET=${OSS_ACCESS_KEY_SECRET}
       - LOG_LEVEL=info
     volumes:
-      - ./config/config.yaml:/root/config.yaml:ro
+      - ./config.yaml:/root/config.yaml:ro
       - ./temp:/tmp/export-middleware
     restart: unless-stopped
     healthcheck:
